@@ -23,9 +23,12 @@ TYPES: BEGIN OF fli_type,
   percentage TYPE p DECIMALS 2,
 END OF fli_type.
 
+*Использование указателя, используется обычно в loop  endloop для обращения непосредственно к строке таблицы
 FIELD-SYMBOLS <fs_flight> TYPE fli_type.
 
 DATA wa_flight TYPE fli_type.
+
+*Определение таблицы с собсвенным типом данных
 DATA itab_flight TYPE STANDARD TABLE OF fli_type WITH NON-UNIQUE KEY carrid connid.
 
 SELECT sflight~carrid sflight~connid fldate seatsmax seatsocc cityfrom cityto arrtime deptime
@@ -37,10 +40,14 @@ SELECT sflight~carrid sflight~connid fldate seatsmax seatsocc cityfrom cityto ar
 IF sy-subrc = 0.
 
   LOOP AT itab_flight ASSIGNING <fs_flight>.
+*Вычисление производятся непосредственно со строками таблицы
     <fs_flight>-time = <fs_flight>-arrtime - <fs_flight>-deptime.
     <fs_flight>-percentage = ( <fs_flight>-seatsocc / <fs_flight>-seatsmax ) * 100.
   ENDLOOP.
+
+*Сортировка по полю percentage
   SORT itab_flight BY percentage.
+
   LOOP AT itab_flight INTO wa_flight.
     WRITE: / wa_flight-carrid,
                wa_flight-connid,
