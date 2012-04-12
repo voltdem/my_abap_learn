@@ -10,12 +10,12 @@ REPORT  ZNVM_Z01.
 
 
 PARAMETERS:
-  pa_int1 TYPE i,
-  pa_int2 TYPE i,
-  pa_op(1) TYPE c.
+   pa_int1 TYPE i,
+   pa_int2 TYPE i,
+   pa_op(1) TYPE c.
 
 IF NOT ( ( pa_op = '+' ) OR
-         ( pa_op = '-' ) OR
+          ( pa_op = '-' ) OR
          ( pa_op = '*' ) ).
 
   WRITE 'Несуществующая или неподдерживаемая операция'(iop).
