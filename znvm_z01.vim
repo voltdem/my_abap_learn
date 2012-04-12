@@ -8,11 +8,13 @@
 
 REPORT  ZNVM_Z01.
 
-
+*Параметры  элементарных типов
 PARAMETERS:
    pa_int1 TYPE i,
    pa_int2 TYPE i,
    pa_op(1) TYPE c.
+
+*Проверка переменной на различные операции
 
 IF NOT ( ( pa_op = '+' ) OR
           ( pa_op = '-' ) OR
@@ -21,6 +23,8 @@ IF NOT ( ( pa_op = '+' ) OR
   WRITE 'Несуществующая или неподдерживаемая операция'(iop).
 
 ELSE.
+
+*Операция выбора
 
   CASE pa_op.
     WHEN '+'.
