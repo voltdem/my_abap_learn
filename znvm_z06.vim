@@ -9,7 +9,7 @@
 REPORT  znvm_z06.
 
 DATA wa_spfli TYPE sflight.
-data gcity TYPE TABLE OF sgeocity.
+DATA gcity TYPE TABLE OF sgeocity.
 
 
 SELECT-OPTIONS da_car FOR wa_spfli-fldate.
@@ -36,6 +36,7 @@ DATA wa_car LIKE LINE OF dat_car.
 DATA itab_flight TYPE it_fli.
 DATA wa_flight LIKE LINE OF itab_flight.
 
+*Запуск события после заполнения данных в экран выбора
 AT SELECTION-SCREEN.
 
   SELECT *
@@ -43,9 +44,10 @@ AT SELECTION-SCREEN.
     INTO TABLE gcity
     WHERE city = cifrom.
 
-   IF sy-subrc <> 0.
-     MESSAGE 'Такого города нет в списке аэропортов' TYPE 'E'.
-   ENDIF.
+  IF sy-subrc <> 0.
+    "Если не найден город в списке выводится сообщение типа ошибки, запрещающий дальнейшее выполнение
+    MESSAGE 'Такого города нет в списке аэропортов' TYPE 'E'.
+  ENDIF.
 
 
 
@@ -72,7 +74,7 @@ START-OF-SELECTION.
     WRITE: 'No flights found !'.
   ENDIF.
 
-
+*Запускаем событие после выбора определенной строки в результирующем списке
 AT LINE-SELECTION.
   IF sy-lsind = 1.
 
