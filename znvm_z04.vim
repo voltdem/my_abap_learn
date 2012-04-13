@@ -24,11 +24,16 @@ TYPES: BEGIN OF fli_typ2,
   city_p(20) TYPE c,
   END OF fli_typ2.
 
+*Определяем рабочие области для вывода типов данных
 DATA wa_flight TYPE fli_type.
 DATA wa_fligh2 TYPE fli_typ2.
 
-DATA itab_flight TYPE STANDARD TABLE OF fli_type WITH NON-UNIQUE KEY carrid connid.
-DATA itab_flight2 TYPE TABLE OF fli_typ2.
+*Определяем таблицы, в кот будут занесены авиарейсы
+DATA itab_flight TYPE STANDARD TABLE OF fli_type WITH NON-UNIQUE KEY carrid connid. "Таблица для прямых вылетов
+DATA itab_flight2 TYPE TABLE OF fli_typ2. "Таблица для вылетов с пересадкой
+
+********************************************************************
+*Выборка прямых вылетов по маршруту и их вывод
 
 SELECT *
        FROM spfli
@@ -45,6 +50,9 @@ ELSE.
   WRITE: 'Нет прямых вылетов из ', c_fr_fli, ' в ',  c_to_fli.
   NEW-LINE.
 ENDIF.
+
+*******************************************************************
+*Выборка вылетов по маршруту с 1 пересадкой
 
 SELECT DISTINCT p~carrid p~connid t~carrid t~connid  p~cityto
        FROM spfli as p INNER JOIN spfli as t ON p~cityto = t~cityfrom
