@@ -81,14 +81,6 @@ START-OF-SELECTION.
 AT LINE-SELECTION.
   IF sy-lsind = 1.
 
-    SELECT SINGLE *
-      FROM scarr
-      WHERE carrid = wa_flight-carrid.
-    SELECT SINGLE *
-      FROM spfli
-      WHERE carrid = wa_flight-carrid AND deptime = wa_flight-deptime
-        AND arrtime = wa_flight-arrtime.
-
     CALL SCREEN 100.
 
   ENDIF.
@@ -145,6 +137,15 @@ ENDFORM.                    "write_res
 *       text
 *----------------------------------------------------------------------*
 MODULE status_0100 OUTPUT.
+
+  SELECT SINGLE *
+    FROM scarr
+    WHERE carrid = wa_flight-carrid.
+  SELECT SINGLE *
+    FROM spfli
+    WHERE carrid = wa_flight-carrid AND deptime = wa_flight-deptime
+      AND arrtime = wa_flight-arrtime.
+
   SET PF-STATUS '100'.
   SET TITLEBAR 'TEST100'.
 
@@ -155,7 +156,7 @@ ENDMODULE.                 " STATUS_0100  OUTPUT
 *       text
 *----------------------------------------------------------------------*
 MODULE user_command_0100 INPUT.
-  IF sy-ucomm = 'BACK'.
-    LEAVE TO SCREEN 0.
+  IF sy-ucomm = 'BACK'. "Обработка команды 'BACK
+    LEAVE TO SCREEN 0. "Возврат на предыдущий экран
   ENDIF.
 ENDMODULE.                 " USER_COMMAND_0100  INPUT
