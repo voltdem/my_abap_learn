@@ -23,7 +23,7 @@ TYPES: BEGIN OF fli_type,
   percentage TYPE p DECIMALS 2,
 END OF fli_type.
 
-TYPES it_fli TYPE STANDARD TABLE OF fli_type WITH NON-UNIQUE KEY carrid connid.
+TYPES it_fli TYPE TABLE OF fli_type.
 
 DATA dat_car TYPE net200_tt_scarr.
 DATA wa_car LIKE LINE OF dat_car.
@@ -82,13 +82,14 @@ AT LINE-SELECTION.
 *      -->VALUE(ITAB_FLIGHT)  text
 *----------------------------------------------------------------------*
 FORM procc_data
-      CHANGING value(lt_flight) TYPE it_fli.
+      CHANGING value(lt_flight) TYPE it_fli."если указывается тип, то в обязательном порядке указывать тип данных глобальный для данной программы
 
-  FIELD-SYMBOLS <fs_flight> TYPE fli_type.
+  DATA wa TYPE fli_type.
 
-  LOOP AT lt_flight ASSIGNING <fs_flight>.
-    <fs_flight>-time = <fs_flight>-arrtime - <fs_flight>-deptime.
-    <fs_flight>-percentage = ( <fs_flight>-seatsocc / <fs_flight>-seatsmax ) * 100.
+  LOOP AT lt_flight INTO wa.
+    wa-time = wa-arrtime - wa-deptime.
+    wa-percentage = ( wa-seatsocc / wa-seatsmax ) * 100.
+    MODIFY lt_flight FROM wa TRANSPORTING time percentage.
   ENDLOOP.
 
   SORT lt_flight BY percentage.
