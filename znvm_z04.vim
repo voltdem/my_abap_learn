@@ -11,62 +11,49 @@ REPORT  znvm_z04.
 PARAMETERS c_fr_fli TYPE spfli-cityfrom.
 PARAMETERS c_to_fli TYPE spfli-cityto.
 
+*Объявляем пользовательский тип данных
 TYPES: BEGIN OF fli_type,
-  carrid TYPE s_carr_id,
-  connid TYPE s_conn_id,
-END OF fli_type.
-
-TYPES: BEGIN OF fli_typ2,
   carr_f TYPE s_carr_id,
   conn_f TYPE s_conn_id,
   carr_t TYPE s_carr_id,
   conn_t TYPE s_conn_id,
   city_p(20) TYPE c,
-  END OF fli_typ2.
+  END OF fli_type.
 
-*Определяем рабочие области для вывода типов данных
-DATA wa_flight TYPE fli_type.
-DATA wa_fligh2 TYPE fli_typ2.
+*Определяем переменные
+DATA: res TYPE i,"результат выборки прямых рейсов
 
-*Определяем таблицы, в кот будут занесены авиарейсы
-DATA itab_flight TYPE STANDARD TABLE OF fli_type WITH NON-UNIQUE KEY carrid connid. "Таблица для прямых вылетов
-DATA itab_flight2 TYPE TABLE OF fli_typ2. "Таблица для вылетов с пересадкой
+      itab_flight TYPE TABLE OF fli_type,"Таблица результатов
+      wa_flight LIKE LINE OF itab_flight."Рабочая область для таблицы результатов
 
-********************************************************************
-*Выборка прямых вылетов по маршруту и их вывод
-
-SELECT *
+*Выборка прямых рейсов
+SELECT DISTINCT spfli~carrid AS carr_f spfli~connid AS conn_f
        FROM spfli
        INTO CORRESPONDING FIELDS OF TABLE itab_flight
        WHERE cityfrom = c_fr_fli AND cityto = c_to_fli.
 
-IF sy-subrc = 0.
-  LOOP AT itab_flight INTO wa_flight.
-    WRITE: / wa_flight-carrid,
-             wa_flight-connid.
+res = sy-subrc.
 
-  ENDLOOP.
-ELSE.
-  WRITE: 'Нет прямых вылетов из ', c_fr_fli, ' в ',  c_to_fli.
-  NEW-LINE.
-ENDIF.
-
-*******************************************************************
-*Выборка вылетов по маршруту с 1 пересадкой
-
+*Выборка рейсов с 1 пересадкой
 SELECT DISTINCT p~carrid p~connid t~carrid t~connid  p~cityto
-       FROM spfli as p INNER JOIN spfli as t ON p~cityto = t~cityfrom
-       INTO TABLE itab_flight2
+       FROM spfli AS p INNER JOIN spfli AS t ON p~cityto = t~cityfrom
+       APPENDING TABLE itab_flight
        WHERE p~cityfrom = c_fr_fli AND t~cityto = c_to_fli.
 
-IF sy-subrc = 0.
-  LOOP AT itab_flight2 INTO wa_fligh2.
-    WRITE: / wa_fligh2-carr_f,
-             wa_fligh2-conn_f,
-             wa_fligh2-carr_t,
-             wa_fligh2-conn_t,
-             wa_fligh2-city_p.
+
+IF ( res = 0 ) OR ( sy-subrc = 0 ) .
+  LOOP AT itab_flight INTO wa_flight.
+    IF wa_flight-conn_t <> 0."Если второй индентификатор рейса есть, выводим все столбцы
+      WRITE: / wa_flight-carr_f,
+               wa_flight-conn_f,
+               wa_flight-carr_t,
+               wa_flight-conn_t,
+               wa_flight-city_p.
+    ELSE."Иначе выводим данные только прямого рейса
+      WRITE: / wa_flight-carr_f,
+               wa_flight-conn_f.
+    ENDIF.
   ENDLOOP.
 ELSE.
-  WRITE: 'Нет вылетов с пересадкой из ', c_fr_fli, ' в ',  c_to_fli.
+  WRITE: 'Нет прямых авиарейсов и авиарейсов с одной пересадкой из ', c_fr_fli, ' в ',  c_to_fli.
 ENDIF.
