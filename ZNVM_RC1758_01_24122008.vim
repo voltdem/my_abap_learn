@@ -166,19 +166,15 @@ LOOP AT itab_bs ASSIGNING <fs_bs>.
   MOVE-CORRESPONDING <fs_bs> TO lwa_line.
 
   "Формирование ЭМИТЕНТА
-  IF <fs_bs>-kunnr is INITIAL.
+  SELECT SINGLE anred name1 name2
+    FROM kna1
+    INTO CORRESPONDING FIELDS OF issuer
+    WHERE kna1~kunnr = <fs_bs>-kunnr.
 
-      lwa_line-issuer = '------'.
-
+  IF sy-subrc <> 0.
+     lwa_line-issuer = '------'.
     ELSE.
-
-      SELECT SINGLE anred name1 name2
-        FROM kna1
-        INTO CORRESPONDING FIELDS OF issuer
-        WHERE kna1~kunnr = <fs_bs>-kunnr.
-
-      CONCATENATE issuer-anred  issuer-name1  issuer-name2 INTO lwa_line-issuer.
-
+     CONCATENATE issuer-anred  issuer-name1  issuer-name2 INTO lwa_line-issuer SEPARATED BY space.
   ENDIF.
 
   "Назначение НАИМЕНОВАНИЯ ЦЕННОЙ БУМАГИ
