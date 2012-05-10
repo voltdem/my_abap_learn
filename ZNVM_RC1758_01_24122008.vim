@@ -66,7 +66,7 @@ DATA:
     g_line   TYPE          ts_line,          "Рабочая область для работы с таблицей акта
     g_issuer TYPE          ts_issuer.        "Описание эмитента
 
-FIELD-SYMBOLS <fs_bs> TYPE ts_bs.
+FIELD-SYMBOLS <ts_bs> TYPE ts_bs.
 
 PARAMETERS:
             p_bukrs   TYPE bseg-bukrs OBLIGATORY, "Балансовая единица (OBLIGATORY - обязательное поле)
@@ -148,14 +148,14 @@ SELECT bukrs belnr gjahr buzei hkont
     AND bsas~augdt >= p_augdt.
 
 *Подтягивание дополнительных данных из таблицы bseg
-LOOP AT gt_bs ASSIGNING <fs_bs>.
+LOOP AT gt_bs ASSIGNING <ts_bs>.
   SELECT SINGLE kunnr xref3 zfbdt augdt dmbtr
     FROM bseg
-    INTO CORRESPONDING FIELDS OF <fs_bs>
-    WHERE bseg~bukrs = <fs_bs>-bukrs
-      AND bseg~belnr = <fs_bs>-belnr
-      AND bseg~gjahr = <fs_bs>-gjahr
-      AND bseg~buzei = <fs_bs>-buzei.
+    INTO CORRESPONDING FIELDS OF <ts_bs>
+    WHERE bseg~bukrs = <ts_bs>-bukrs
+      AND bseg~belnr = <ts_bs>-belnr
+      AND bseg~gjahr = <ts_bs>-gjahr
+      AND bseg~buzei = <ts_bs>-buzei.
 ENDLOOP.
 
 **************************************************************
@@ -163,15 +163,15 @@ ENDLOOP.
 *Формирование строки таблицы АКТА
 **************************************************************
 FREE gt_line.
-LOOP AT gt_bs ASSIGNING <fs_bs>.
+LOOP AT gt_bs ASSIGNING <ts_bs>.
   CLEAR g_line.
-  MOVE-CORRESPONDING <fs_bs> TO g_line.
+  MOVE-CORRESPONDING <ts_bs> TO g_line.
 
   "Формирование ЭМИТЕНТА
   SELECT SINGLE anred name1 name2
     FROM kna1
     INTO CORRESPONDING FIELDS OF g_issuer
-    WHERE kna1~kunnr = <fs_bs>-kunnr.
+    WHERE kna1~kunnr = <ts_bs>-kunnr.
 
   IF sy-subrc <> 0.
      g_line-issuer = '------'.
@@ -180,7 +180,7 @@ LOOP AT gt_bs ASSIGNING <fs_bs>.
   ENDIF.
 
   "Назначение НАИМЕНОВАНИЯ ЦЕННОЙ БУМАГИ
-  IF <fs_bs>-hkont CP '0000113*'.
+  IF <ts_bs>-hkont CP '0000113*'.
           g_line-n_paper = 'простой вексель'.
         ELSE.
           g_line-n_paper = '------'.
