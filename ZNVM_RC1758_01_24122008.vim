@@ -60,25 +60,27 @@ TYPES: BEGIN OF ts_bs,
        END OF ts_bs.
 
 DATA:
-    g_form   TYPE          ts_forma,         "Переменная, описывающая текущую форму
-    gt_bs    TYPE TABLE OF ts_bs,            "Таблица для хранения результата из таблицы bseg
-    gt_line  TYPE TABLE OF ts_line,          "Таблица для хранения таблицы акта
-    g_line   TYPE          ts_line,          "Рабочая область для работы с таблицей акта
-    g_issuer TYPE          ts_issuer.        "Описание эмитента
+  g_form   TYPE          ts_forma,         "Переменная, описывающая текущую форму
+  gt_bs    TYPE TABLE OF ts_bs,            "Таблица для хранения результата из таблицы bseg
+  gt_line  TYPE TABLE OF ts_line,          "Таблица для хранения таблицы акта
+  g_line   TYPE          ts_line,          "Рабочая область для работы с таблицей акта
+  g_issuer TYPE          ts_issuer.        "Описание эмитента
 
 FIELD-SYMBOLS <ts_bs> TYPE ts_bs.
 
 PARAMETERS:
-            p_bukrs   TYPE bseg-bukrs OBLIGATORY, "Балансовая единица (OBLIGATORY - обязательное поле)
-            "Тип документа основания
-            p_dtype1  TYPE c RADIOBUTTON GROUP 1 DEFAULT 'X',
-            p_dtype2  TYPE c RADIOBUTTON GROUP 1,
-            p_dtype3  TYPE c RADIOBUTTON GROUP 1,
-            "
-            p_num(20) TYPE c,             "№ документа основания
-            p_budat   TYPE dats.          "Дата документа основания
-SELECT-OPTIONS so_hkont  FOR  bseg-hkont. "Номер счета бухгалтеского учета
-PARAMETERS  p_augdt   TYPE dats.          "Дата инвентаризации
+  p_bukrs   TYPE bseg-bukrs OBLIGATORY, "Балансовая единица (OBLIGATORY - обязательное поле)
+  "Тип документа основания
+  p_dtype1  TYPE c RADIOBUTTON GROUP 1 DEFAULT 'X',
+  p_dtype2  TYPE c RADIOBUTTON GROUP 1,
+  p_dtype3  TYPE c RADIOBUTTON GROUP 1,
+  "
+  p_num(20) TYPE c,             "№ документа основания
+  p_budat   TYPE dats.          "Дата документа основания
+SELECT-OPTIONS:
+  so_hkont  FOR  bseg-hkont. "Номер счета бухгалтеского учета
+PARAMETERS:
+  p_augdt   TYPE dats.          "Дата инвентаризации
 
 AT SELECTION-SCREEN.
 
@@ -175,10 +177,10 @@ LOOP AT gt_bs ASSIGNING <ts_bs>.
 
   IF sy-subrc <> 0.
      g_line-issuer = '------'.
-    ELSE.
+  ELSE.
      CONCATENATE g_issuer-anred  g_issuer-name1  g_issuer-name2 INTO g_line-issuer SEPARATED BY space.
+     SHIFT g_line-issuer LEFT DELETING LEADING ' '.
   ENDIF.
-
   "Назначение НАИМЕНОВАНИЯ ЦЕННОЙ БУМАГИ
   IF <ts_bs>-hkont CP '0000113*'.
           g_line-n_paper = 'простой вексель'.
@@ -191,7 +193,7 @@ LOOP AT gt_bs ASSIGNING <ts_bs>.
 ENDLOOP.
 **************************************************************
 
-SORT gt_line BY issuer ASCENDING AS TEXT.
+SORT gt_line BY issuer ASCENDING.
 
 DATA: lo_alv TYPE REF TO cl_salv_table.
 
